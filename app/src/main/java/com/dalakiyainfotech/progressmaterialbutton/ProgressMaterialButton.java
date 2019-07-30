@@ -1,15 +1,13 @@
 package com.dalakiyainfotech.progressmaterialbutton;
 
 import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
@@ -35,6 +33,7 @@ public class ProgressMaterialButton extends RelativeLayout {
     private int textColor, backgroundColor, pbColor;
     private ProgressListener progressListener;
     private String fontPath = "";
+    private int textSize = 0;
 
     public ProgressMaterialButton(Context context) {
         super(context);
@@ -74,31 +73,38 @@ public class ProgressMaterialButton extends RelativeLayout {
         addView(progressBar, 1);
         if (attrs != null) {
             final TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.CustomMaterialButton);
+
             if (attributes.hasValue(R.styleable.CustomMaterialButton_bt_text))
                 text = attributes.getString(R.styleable.CustomMaterialButton_bt_text);
             setButtonText(text);
+
             textColor = attributes.getResourceId(R.styleable.CustomMaterialButton_bt_text_color, -1);
-            if (textColor != -1) {
-                setButtonTextColor(textColor);
-            }
+            setButtonTextColor(textColor);
+
+            textSize = attributes.getResourceId(R.styleable.CustomMaterialButton_bt_text_size,textSize);
+            materialButton.setTextSize(TypedValue.COMPLEX_UNIT_PX,context.getResources().getDimensionPixelSize(textSize));
+
+            materialButton.setAllCaps(attributes.getBoolean(R.styleable.CustomMaterialButton_bt_text_all_caps,false));
+
             backgroundColor = attributes.getResourceId(R.styleable.CustomMaterialButton_bt_background_color, -1);
-            if (backgroundColor != -1) {
-                setButtonBackgroundColor(backgroundColor);
-            }
+            setButtonBackgroundColor(backgroundColor);
+
             pbColor = attributes.getResourceId(R.styleable.CustomMaterialButton_pb_color, -1);
-            if (pbColor != -1) {
-                setProgressBarColor(pbColor);
-            }
+            setProgressBarColor(pbColor);
+
             cornerRadius = attributes.getDimensionPixelSize(R.styleable.CustomMaterialButton_bt_corner_radius, 0);
             setButtonCornerRadius(cornerRadius);
+
             buttonElevation = attributes.getDimension(R.styleable.CustomMaterialButton_bt_elevation, 0);
             setButtonElevation(buttonElevation);
+
             if (attributes.hasValue(R.styleable.CustomMaterialButton_bt_font_path)) {
                 fontPath = attributes.getString(R.styleable.CustomMaterialButton_bt_font_path);
             }
             if (!TextUtils.isEmpty(fontPath)) {
                 setButtonFontPath(fontPath);
             }
+
             animationDuration = attributes.getInteger(R.styleable.CustomMaterialButton_bt_anim_duration, 250);
             setButtonAnimationDuration(animationDuration);
             attributes.recycle();
@@ -180,7 +186,7 @@ public class ProgressMaterialButton extends RelativeLayout {
         }
     }
 
-    public void setButtonClickListener(View.OnClickListener onClickListener) {
+    public void setButtonClickListener(OnClickListener onClickListener) {
         this.onClickListener = onClickListener;
         setOnClickListener(this.onClickListener);
     }

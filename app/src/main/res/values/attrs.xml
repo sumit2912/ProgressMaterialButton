@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="CustomMaterialButton">
-        <attr name="bt_text" format="string" />
-        <attr name="bt_text_color" format="reference" />
-        <attr name="bt_background_color" format="reference" />
-        <attr name="pb_color" format="reference" />
-        <attr name="bt_corner_radius" format="dimension" />
-        <attr name="bt_elevation" format="dimension" />
-        <attr name="bt_font_path" format="string" />
-        <attr name="bt_anim_duration" format="integer" />
+        <attr name="bt_text" format="string|reference" />
+        <attr name="bt_text_color" format="color|reference" />
+        <attr name="bt_text_size" format="dimension|reference" />
+        <attr name="bt_background_color" format="color|reference" />
+        <attr name="pb_color" format="color|reference" />
+        <attr name="bt_corner_radius" format="dimension|reference" />
+        <attr name="bt_elevation" format="dimension|reference" />
+        <attr name="bt_font_path" format="string|reference" />
+        <attr name="bt_anim_duration" format="integer|reference" />
+        <attr name="bt_text_all_caps" format="boolean" />
     </declare-styleable>
 </resources>

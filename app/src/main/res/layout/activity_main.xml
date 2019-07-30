@@ -10,10 +10,18 @@
     <com.dalakiyainfotech.progressmaterialbutton.ProgressMaterialButton
         android:id="@+id/button"
         android:layout_width="150dp"
-        android:layout_height="50dp"
+        android:layout_height="70dp"
+        android:layout_marginBottom="50dp"
+        app:bt_anim_duration="250"
+        app:bt_background_color="@color/colorPrimaryDark"
+        app:bt_corner_radius="25dp"
+        app:bt_elevation="5dp"
+        app:bt_font_path="123"
+        app:bt_text="Submit"
+        app:bt_text_color="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:pb_color="@android:color/white" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

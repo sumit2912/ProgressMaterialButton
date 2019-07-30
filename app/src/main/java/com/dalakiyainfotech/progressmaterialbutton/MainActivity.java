@@ -3,9 +3,10 @@ package com.dalakiyainfotech.progressmaterialbutton;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener{
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, ProgressListener {
     ProgressMaterialButton button;
 
     @Override
@@ -13,9 +14,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         button = findViewById(R.id.button);
-        button.setButtonText("Submit");
-        button.setButtonElevation(10);
-        button.setButtonCornerRadius(20);
+        button.setProgressListener(this);
         button.setButtonClickListener(this);
     }
 
@@ -23,13 +22,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.button:
-                button.setRefresh(true);
-                button.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        button.setRefresh(false);
-                    }
-                }, 5000);
+                button.showProgressBar(true,0);
+                button.postDelayed(() -> button.showProgressBar(false,0), 5000);
+                break;
+        }
+    }
+
+    @Override
+    public void onProgressChange(boolean isShowing, int tag) {
+        switch (tag){
+            case 0:
+                if(!isShowing){
+                    //Do your stuff
+                    Log.e("Button","Progress Finished with tag "+tag);
+                }
                 break;
         }
     }

@@ -1,13 +1,21 @@
 package com.dalakiyainfotech.progressmaterialbutton;
 
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+
+import androidx.core.content.ContextCompat;
 
 import com.google.android.material.button.MaterialButton;
 
@@ -16,13 +24,17 @@ public class ProgressMaterialButton extends RelativeLayout {
     public MaterialButton materialButton;
     public ProgressBar progressBar;
     private Context context;
-    private String text;
-    private int buttonWidth, buttonHeight;
-    private int radius, cornerRadius;
+    private String text = "";
+    private int buttonWidth = -1, buttonHeight = -1;
+    private int cornerRadius = 0;
     private ValueAnimator widthAnimator = null;
     private View.OnClickListener onClickListener;
     private RelativeLayout.LayoutParams paramsButton, paramsProgress;
     private float buttonElevation = 0;
+    private long animationDuration = 0;
+    private int textColor, backgroundColor, pbColor;
+    private ProgressListener progressListener;
+    private String fontPath = "";
 
     public ProgressMaterialButton(Context context) {
         super(context);
@@ -60,6 +72,37 @@ public class ProgressMaterialButton extends RelativeLayout {
         progressBar.setIndeterminate(true);
         addView(materialButton, 0);
         addView(progressBar, 1);
+        if (attrs != null) {
+            final TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.CustomMaterialButton);
+            if (attributes.hasValue(R.styleable.CustomMaterialButton_bt_text))
+                text = attributes.getString(R.styleable.CustomMaterialButton_bt_text);
+            setButtonText(text);
+            textColor = attributes.getResourceId(R.styleable.CustomMaterialButton_bt_text_color, -1);
+            if (textColor != -1) {
+                setButtonTextColor(textColor);
+            }
+            backgroundColor = attributes.getResourceId(R.styleable.CustomMaterialButton_bt_background_color, -1);
+            if (backgroundColor != -1) {
+                setButtonBackgroundColor(backgroundColor);
+            }
+            pbColor = attributes.getResourceId(R.styleable.CustomMaterialButton_pb_color, -1);
+            if (pbColor != -1) {
+                setProgressBarColor(pbColor);
+            }
+            cornerRadius = attributes.getDimensionPixelSize(R.styleable.CustomMaterialButton_bt_corner_radius, 0);
+            setButtonCornerRadius(cornerRadius);
+            buttonElevation = attributes.getDimension(R.styleable.CustomMaterialButton_bt_elevation, 0);
+            setButtonElevation(buttonElevation);
+            if (attributes.hasValue(R.styleable.CustomMaterialButton_bt_font_path)) {
+                fontPath = attributes.getString(R.styleable.CustomMaterialButton_bt_font_path);
+            }
+            if (!TextUtils.isEmpty(fontPath)) {
+                setButtonFontPath(fontPath);
+            }
+            animationDuration = attributes.getInteger(R.styleable.CustomMaterialButton_bt_anim_duration, 250);
+            setButtonAnimationDuration(animationDuration);
+            attributes.recycle();
+        }
     }
 
     public void setButtonText(String text) {
@@ -70,6 +113,19 @@ public class ProgressMaterialButton extends RelativeLayout {
     public void setButtonText(int resId) {
         this.text = context.getResources().getString(resId);
         materialButton.setText(this.text);
+    }
+
+    public String getButtonText() {
+        return this.text;
+    }
+
+    public void setButtonTextColor(int resId) {
+        textColor = resId;
+        try {
+            materialButton.setTextColor(context.getResources().getColor(textColor));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void setButtonElevation(float elevation) {
@@ -90,46 +146,90 @@ public class ProgressMaterialButton extends RelativeLayout {
         return this.cornerRadius;
     }
 
+    public void setButtonBackgroundColor(int resId) {
+        backgroundColor = resId;
+        try {
+            materialButton.setBackgroundTintList(ContextCompat.getColorStateList(context, backgroundColor));
+        } catch (Exception e) {
+        }
+    }
+
+    public void setButtonFontPath(String fontPath) {
+        this.fontPath = fontPath;
+        try {
+            materialButton.setTypeface(Typeface.createFromAsset(context.getAssets(), fontPath));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public long getButtonAnimationDuration() {
+        return animationDuration;
+    }
+
+    public void setButtonAnimationDuration(long animationDuration) {
+        this.animationDuration = animationDuration;
+    }
+
+    public void setProgressBarColor(int resId) {
+        pbColor = resId;
+        try {
+            progressBar.getIndeterminateDrawable().setTint(context.getResources().getColor(pbColor));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void setButtonClickListener(View.OnClickListener onClickListener) {
         this.onClickListener = onClickListener;
         setOnClickListener(this.onClickListener);
     }
 
-    public void setRefresh(boolean refresh) {
-        buttonWidth = getWidth();
-        buttonHeight = getHeight();
-        radius = buttonHeight;
-        Log.e("Button", "Width = " + buttonWidth);
-        Log.e("Button", "Height = " + buttonHeight);
-        Log.e("Button", "radius = " + radius);
-        if (refresh) {
+    public void setProgressListener(ProgressListener progressListener) {
+        this.progressListener = progressListener;
+    }
+
+    public void showProgressBar(boolean show, int tag) {
+        if (buttonWidth == -1 && buttonHeight == -1) {
+            buttonWidth = getWidth();
+            buttonHeight = getHeight();
+        }
+        if (show) {
             widthAnimator = ValueAnimator.ofInt(buttonWidth, buttonHeight);
-            widthAnimator.setDuration(250);
-            materialButton.setText("");
+            widthAnimator.setDuration(animationDuration);
+            materialButton.setVisibility(GONE);
+            setBackground(getGradientDrawable(materialButton.getBackgroundTintList().getColorForState(MaterialButton.PRESSED_ENABLED_STATE_SET, 0)));
             this.postDelayed(() -> {
-                materialButton.setCornerRadius(radius);
                 progressBar.setVisibility(VISIBLE);
-                progressBar.setElevation(getButtonElevation()+5);
-            }, 250);
+            }, animationDuration);
             setOnClickListener(null);
         } else {
             widthAnimator = ValueAnimator.ofInt(buttonHeight, buttonWidth);
-            widthAnimator.setDuration(250);
+            widthAnimator.setDuration(animationDuration);
             this.postDelayed(() -> {
                 setOnClickListener(onClickListener);
-                materialButton.setCornerRadius(cornerRadius);
                 materialButton.setText(text);
+                setBackground(null);
+                materialButton.setVisibility(VISIBLE);
                 progressBar.setVisibility(GONE);
-                progressBar.setElevation(0);
-            }, 250);
+            }, animationDuration);
         }
         if (widthAnimator != null) {
             widthAnimator.addUpdateListener(value -> {
-                Log.e("Button = " + refresh, "value = " + (int) value.getAnimatedValue());
-                materialButton.getLayoutParams().width = (int) value.getAnimatedValue();
-                materialButton.requestLayout();
+                getLayoutParams().width = (int) value.getAnimatedValue();
+                requestLayout();
             });
             widthAnimator.start();
         }
+        if (progressListener != null)
+            progressListener.onProgressChange(show, tag);
+    }
+
+    public GradientDrawable getGradientDrawable(int color) {
+        GradientDrawable gd = new GradientDrawable();
+        gd.setShape(GradientDrawable.RECTANGLE);
+        gd.setCornerRadius(buttonHeight);
+        gd.setColor(color);
+        return gd;
     }
 }
